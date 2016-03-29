@@ -15,12 +15,14 @@ import android.util.Log;
 public class AnagramDictionary {
 
     private static final int MIN_NUM_ANAGRAMS = 5;
-    private static final int DEFAULT_WORD_LENGTH = 3;
+    private static  int DEFAULT_WORD_LENGTH = 3;
     private static final int MAX_WORD_LENGTH = 7;
     private Random random = new Random();
     private HashSet<String> wordSet =  new HashSet<String>();
     private ArrayList<String> wordList=new ArrayList<String>();
     private HashMap<String, ArrayList<String>> lettersToWord = new HashMap<String, ArrayList<String>>();
+    private HashMap<Integer, ArrayList<String>> sizeToWord = new HashMap<Integer, ArrayList<String>>();
+
 
     public AnagramDictionary(InputStream wordListStream) throws IOException {
         BufferedReader in = new BufferedReader(new InputStreamReader(wordListStream));
@@ -34,10 +36,26 @@ public class AnagramDictionary {
             String sorted= Helper(word);
             if(lettersToWord.containsKey(sorted)){
                 lettersToWord.get(sorted).add(word);
+                if(sizeToWord.containsKey(word.length())){
+                    sizeToWord.get(word.length()).add(word);
+                }
+                else{
+                    sizeToWord.put(word.length(),new ArrayList<String>());
+                    sizeToWord.get(word.length()).add(word);
+                }
+
             }
             else{
-                lettersToWord.put(sorted, new ArrayList<String >());
+                lettersToWord.put(sorted, new ArrayList<String>());
                 lettersToWord.get(sorted).add(word);
+                if(sizeToWord.containsKey(word.length())){
+                    sizeToWord.get(word.length()).add(word);
+                }
+                else{
+                    sizeToWord.put(word.length(),new ArrayList<String>());
+                    sizeToWord.get(word.length()).add(word);
+                }
+
             }
         }
 
@@ -84,17 +102,20 @@ public class AnagramDictionary {
     }
 
     public String pickGoodStarterWord() {
-        int wordListSize= wordList.size();
+        //int wordListSize= wordList.size();
+        ArrayList<String> words = (sizeToWord.get(DEFAULT_WORD_LENGTH));
         Random rand = new Random();
-        int index=rand.nextInt((wordListSize-1)+0);
+        int index=rand.nextInt((words.size()-1)+0);
        //long index= Math.round( Math.random() );
-        while( wordList.get(index).length()<3 || wordList.get(index).length()>5||
-                getAnagramsWithOneMoreLetter(wordList.get(index)).size()< MIN_NUM_ANAGRAMS){
-            index=rand.nextInt((wordListSize-1)+0);
-
+        while( getAnagramsWithOneMoreLetter(words.get(index)).size()< MIN_NUM_ANAGRAMS){
+            index=rand.nextInt((words.size()-1)+0);
+        } 
+        if(DEFAULT_WORD_LENGTH == MAX_WORD_LENGTH)  {
+            DEFAULT_WORD_LENGTH = 3;}
+        else    {
+            DEFAULT_WORD_LENGTH++;
         }
-
-        return wordList.get(index);
+        return words.get(index);
 
 
     }
